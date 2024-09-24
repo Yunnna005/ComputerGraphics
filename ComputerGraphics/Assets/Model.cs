@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class Model
 {
-    List<Vector3> vertices;
+    internal List<Vector3> vertices;
     List<Vector3Int> faces;
     List<Vector2> texture_coordinates;
     List<Vector3Int> texture_index_list;
@@ -46,8 +46,8 @@ public class Model
         normals.Add(new Vector3(0, 0, 1));
         normals.Add(new Vector3(0, 0, 1));
         //Top
-        normals.Add(new Vector3(1, 1, 0));
-        normals.Add(new Vector3(1, 1, 0));
+        normals.Add(new Vector3(1, 1, 0).normalized);
+        normals.Add(new Vector3(1, 1, 0).normalized);
         //Vertical Left
         normals.Add(new Vector3(-1, 0, 0));
         normals.Add(new Vector3(-1, 0, 0));
