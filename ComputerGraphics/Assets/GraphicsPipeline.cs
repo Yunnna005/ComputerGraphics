@@ -37,7 +37,26 @@ public class GraphicsPipeline : MonoBehaviour
         Matrix4x4 singleTransformationMatrix = translationMatrix * scaleMatrix* rotationMatrix;
         //displayMatrix(singleTransformationMatrix);
         List<Vector4> imageAfterTransformation = applyTransformation(verts, singleTransformationMatrix);
-        displayVert(imageAfterTransformation);
+        //displayVert(imageAfterTransformation);
+
+        Vector3 cameraPosition = new Vector3(21, 4, 51);
+        Vector3 cameraLootAt = new Vector3(1, 3, 1).normalized;
+        Vector3 cameraLootUp = new Vector3(2, 1, 19).normalized;
+        Matrix4x4 cameraMatrix = Matrix4x4.LookAt(cameraPosition, cameraLootAt, cameraLootUp);
+        //displayMatrix(cameraMatrix);
+        List<Vector4> imageAfterCameraMetrix = applyTransformation(imageAfterTranslation, cameraMatrix);
+        //displayVert(imageAfterViewingMetrix);
+
+        //Projection z=-1
+        Matrix4x4 projectionMatrix = Matrix4x4.Perspective(90, 1, 1, 1000);
+        //displayMatrix(projectionMatrix);
+        List<Vector4> imageAfterProjection =  applyTransformation(imageAfterCameraMetrix, projectionMatrix);
+        //displayVert(imageAfterProjection);
+
+        Matrix4x4 matrixForEverything = projectionMatrix * cameraMatrix* singleTransformationMatrix;
+        //displayMatrix(matrixForEverything);
+        List<Vector4> imageFinal = applyTransformation(verts, matrixForEverything);
+        displayVert(imageFinal);
 
     }
 
