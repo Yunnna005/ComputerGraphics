@@ -56,8 +56,9 @@ public class GraphicsPipeline : MonoBehaviour
         Matrix4x4 matrixForEverything = projectionMatrix * cameraMatrix* singleTransformationMatrix;
         //displayMatrix(matrixForEverything);
         List<Vector4> imageFinal = applyTransformation(verts, matrixForEverything);
-        displayVert(imageFinal);
+        //displayVert(imageFinal);
 
+        myModel.CreateUnityGameObject();
     }
 
     private void displayVert(List<Vector4> imageAfterRotation)
