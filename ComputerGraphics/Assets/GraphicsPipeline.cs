@@ -57,8 +57,6 @@ public class GraphicsPipeline : MonoBehaviour
         //displayMatrix(matrixForEverything);
         List<Vector4> imageFinal = applyTransformation(verts, matrixForEverything);
         //displayVert(imageFinal);
-
-        myModel.CreateUnityGameObject();
     }
 
     private void displayVert(List<Vector4> imageAfterRotation)
