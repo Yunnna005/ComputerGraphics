@@ -9,7 +9,7 @@ public class GraphicsPipeline : MonoBehaviour
 
     void Start()
     {
-        myModel = new Model();
+        /*myModel = new Model();
         List<Vector4> verts = convertToHomg(myModel.vertices);
 
         //Rotation
@@ -56,7 +56,17 @@ public class GraphicsPipeline : MonoBehaviour
         Matrix4x4 matrixForEverything = projectionMatrix * cameraMatrix* singleTransformationMatrix;
         //displayMatrix(matrixForEverything);
         List<Vector4> imageFinal = applyTransformation(verts, matrixForEverything);
-        //displayVert(imageFinal);
+        //displayVert(imageFinal);*/
+
+
+
+        OutCode outCode1 = new OutCode(new Vector2(0.6f, 2.2f));
+        outCode1.Display();
+
+        OutCode outCode2 = new OutCode(new Vector2(2.6f, -4.2f));
+        outCode2.Display();
+
+        print((outCode1 == outCode2));
     }
 
     private void displayVert(List<Vector4> imageAfterRotation)
