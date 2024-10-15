@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
+using Unity.VisualScripting;
 using Unity.VisualScripting.FullSerializer;
 using UnityEngine;
 
@@ -9,7 +10,7 @@ public class OutCode
 {
     private Vector2 point;
 
-    bool up, down, left, right;
+    public bool up, down, left, right;
 
     public OutCode(Vector2 point)
     {
@@ -60,12 +61,6 @@ public class OutCode
         return !(oc1 == oc2);
     }
 
-    /*Trivial Acceptance
-     * (oc1+oc2) == null
-     * 
-     * Trivial Rejection
-     * (oc1*oc2) != null
-     */
 }
 
 
