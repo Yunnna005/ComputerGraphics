@@ -10,6 +10,7 @@ public class GraphicsPipeline : MonoBehaviour
 
     void Start()
     {
+        #region Create Model
         /*myModel = new Model();
         List<Vector4> verts = convertToHomg(myModel.vertices);
 
@@ -58,7 +59,7 @@ public class GraphicsPipeline : MonoBehaviour
         //displayMatrix(matrixForEverything);
         List<Vector4> imageFinal = applyTransformation(verts, matrixForEverything);
         //displayVert(imageFinal);*/
-
+        #endregion
 
         #region Test OutCode Script
         OutCode outCode1 = new OutCode(new Vector2(0.6f, 2.2f));
@@ -75,13 +76,13 @@ public class GraphicsPipeline : MonoBehaviour
         Vector2 end = new Vector2(0.2f, 0.2f);
 
         bool result1 = LineClipping(ref start, ref end);
-        print(result1);
+        //print(result1);
 
         Vector2 start2 = new Vector2(-5f, -1f);
         Vector2 end2 = new Vector2(-2f, -2f);
 
         bool result2 = LineClipping(ref start2, ref end2);
-        print(result2);
+        //print(result2);
         #endregion
 
         #region Test Intersect
@@ -90,16 +91,35 @@ public class GraphicsPipeline : MonoBehaviour
 
         Vector2 result_Up_edge = Intersect(start3, end3, 0);
         Vector2 ecpected_Up = new Vector2(-2, 1);
-        print("Result: "+result_Up_edge+ "  Expected: "+ecpected_Up);
+        //print("Result: "+result_Up_edge+ "  Expected: "+ecpected_Up);
 
         #endregion
-    }
 
-    /*if strat_oc == inScrean_oc
-     * return LineClip (ref end, ref start);
-     * 
-     * 
-     */
+        #region Test Breshenham
+        Vector2Int start4 = new Vector2Int(12, 31);
+        Vector2Int end4 = new Vector2Int(20, 35);
+
+        List<Vector2Int> breshenhamList = Bresh(start4, end4);
+        print("Start test Breshenham \n\n Start: "+ start4 + "\nEnd: "+end4);
+        string list_bresh = ""; 
+        foreach (Vector2Int bresh in breshenhamList)
+        {
+            list_bresh += bresh.ToString() + "\n";
+        }
+        print(list_bresh);
+
+        Vector2Int start5 = new Vector2Int(12, 31);
+        Vector2Int end5 = new Vector2Int(20, 28);
+        List<Vector2Int> breshenhamList2 = Bresh(start4, end4);
+        print("Start test Breshenham \n\n Start: " + start5 + "\nEnd: " + end5);
+        string list_bresh2 = "";
+        foreach (Vector2Int bresh in breshenhamList2)
+        {
+            list_bresh2 += bresh.ToString() + "\n";
+        }
+        print(list_bresh2);
+        #endregion
+    }
 
     #region Create Model
     private void displayVert(List<Vector4> imageAfterRotation)
@@ -140,7 +160,6 @@ public class GraphicsPipeline : MonoBehaviour
         { print(rotationMatrix.GetRow(i)); }
     }
     #endregion
-
 
     #region Clipping
     /// <summary>
@@ -223,6 +242,65 @@ public class GraphicsPipeline : MonoBehaviour
         }
 
         return new Vector2(0,0);
+    }
+
+    #endregion
+
+    #region Breshenham
+
+    List<Vector2Int> Bresh(Vector2Int start, Vector2Int end)
+    {
+        List<Vector2Int> outList = new List<Vector2Int>();
+        outList.Add(start);
+        int x, y, dx, dy, neg, pos, p;
+        x = start.x;
+        y = start.y;
+        dx = end.x - x;
+        if (dx < 0)
+        {
+            return Bresh(end, start);
+        }
+        dy = end.y - y;
+        if (dy < 0)
+        {
+            return NegY(Bresh(NegY(start), NegY(end)));
+        }
+        neg = 2 * (dy - dx);
+        pos = 2 * dy;
+        p = 2 * dy - dx;
+
+        while (x != end.x)
+        {
+            x++;
+            if (p <= 0)
+            {
+                p += pos;
+            }
+            else
+            {
+                y++;
+                p += neg;
+            }
+
+            outList.Add(new Vector2Int(x, y));
+        }
+
+        return outList;
+    }
+
+    private List<Vector2Int> NegY(List<Vector2Int> vector2Ints)
+    {
+        List<Vector2Int> negatedList = new List<Vector2Int>();
+        foreach (var v in vector2Ints)
+        {
+            negatedList.Add(NegY(v)); 
+        }
+        return negatedList;
+    }
+
+    private Vector2Int NegY(Vector2Int v)
+    {
+        return new Vector2Int(v.x, -v.y);
     }
 
     #endregion
