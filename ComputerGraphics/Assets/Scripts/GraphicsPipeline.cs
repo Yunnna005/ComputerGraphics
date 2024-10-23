@@ -61,64 +61,6 @@ public class GraphicsPipeline : MonoBehaviour
         //displayVert(imageFinal);*/
         #endregion
 
-        #region Test OutCode Script
-        OutCode outCode1 = new OutCode(new Vector2(0.6f, 2.2f));
-        //outCode1.Display();
-
-        OutCode outCode2 = new OutCode(new Vector2(2.6f, -4.2f));
-        //outCode2.Display();
-
-        //print((outCode1 == outCode2));
-        #endregion
-
-        #region Test Line Clipping
-        Vector2 start = new Vector2(0.1f, 0.1f);
-        Vector2 end = new Vector2(0.2f, 0.2f);
-
-        bool result1 = LineClipping(ref start, ref end);
-        //print(result1);
-
-        Vector2 start2 = new Vector2(-5f, -1f);
-        Vector2 end2 = new Vector2(-2f, -2f);
-
-        bool result2 = LineClipping(ref start2, ref end2);
-        //print(result2);
-        #endregion
-
-        #region Test Intersect
-        Vector2 start3 = new Vector2(-1.5f, 0.5f);
-        Vector2 end3 = new Vector2(0.5f, -1.5f);
-
-        Vector2 result_Up_edge = Intersect(start3, end3, 0);
-        Vector2 ecpected_Up = new Vector2(-2, 1);
-        //print("Result: "+result_Up_edge+ "  Expected: "+ecpected_Up);
-
-        #endregion
-
-        #region Test Breshenham
-        Vector2Int start4 = new Vector2Int(12, 31);
-        Vector2Int end4 = new Vector2Int(20, 35);
-
-        List<Vector2Int> breshenhamList = Bresh(start4, end4);
-        print("Start test Breshenham \n\n Start: "+ start4 + "\nEnd: "+end4);
-        string list_bresh = ""; 
-        foreach (Vector2Int bresh in breshenhamList)
-        {
-            list_bresh += bresh.ToString() + "\n";
-        }
-        print(list_bresh);
-
-        Vector2Int start5 = new Vector2Int(12, 31);
-        Vector2Int end5 = new Vector2Int(20, 28);
-        List<Vector2Int> breshenhamList2 = Bresh(start4, end4);
-        print("Start test Breshenham \n\n Start: " + start5 + "\nEnd: " + end5);
-        string list_bresh2 = "";
-        foreach (Vector2Int bresh in breshenhamList2)
-        {
-            list_bresh2 += bresh.ToString() + "\n";
-        }
-        print(list_bresh2);
-        #endregion
     }
 
     #region Create Model
@@ -190,8 +132,6 @@ public class GraphicsPipeline : MonoBehaviour
 
        if(start_oc == inScrean_oc) { return LineClipping(ref end, ref start); };
 
-        // start is outsude screen
-
         if (start_oc.up)
         {
             start = Intersect(start, end, 0);
@@ -221,34 +161,59 @@ public class GraphicsPipeline : MonoBehaviour
         return false;
     }
 
-    Vector2 Intersect(Vector2 start, Vector2 end, int edge)
+    public Vector2 Intersect(Vector2 start, Vector2 end, int edge)
     {
         // int edge 0 = up, 1 = down, 2 = left, 3 = right
-        float m = (end.y - start.y) / (end.x - start.x);
 
+        // Check for vertical line
+        if (end.x == start.x)
+        {
+            return edge switch
+            {
+                0 => new Vector2(start.x, 1), // Up edge
+                1 => new Vector2(start.x, -1), // Down edge
+                2 => new Vector2(-1, start.y), // Left edge
+                3 => new Vector2(1, start.y),  // Right edge
+                _ => new Vector2(float.NaN, float.NaN) // No intersection with up or down edges
+            };
+        }
+
+        // Check for horizontal line
+        if (end.y == start.y)
+        {
+            return edge switch
+            {
+                0 => new Vector2(float.NaN, float.NaN), // Up edge (no valid x)
+                1 => new Vector2(float.NaN, float.NaN), // Down edge (no valid x)
+                _ => new Vector2(float.NaN, float.NaN) // No intersection with left or right edges
+            };
+        }
+
+        // Regular case: calculate slope and intercept
+        float m = (end.y - start.y) / (end.x - start.x);
         // y = mx+c  or  x = y-c/m
         float c = start.y - m * start.x;
 
         switch (edge)
         {
-            case 0:    //up
-                return new Vector2((1-c)/m , 1); // y = 1
-            case 1:    //down
-                return new Vector2((-1-c)/m , -1); // y = -1
-            case 2:    //left
-                return new Vector2(-1, c-m); // left x = -1
-            case 3:    //right
-                return new Vector2(1, m+c); //right x = 1
+            case 0: // up
+                return new Vector2((1 - c) / m, 1); // y = 1
+            case 1: // down
+                return new Vector2((-1 - c) / m, -1); // y = -1
+            case 2: // left
+                return new Vector2(-1, c - m); // left x = -1
+            case 3: // right
+                return new Vector2(1, m + c); // right x = 1
+            default:
+                return new Vector2(float.NaN, float.NaN); // Invalid edge
         }
-
-        return new Vector2(0,0);
     }
 
     #endregion
 
     #region Breshenham
 
-    List<Vector2Int> Bresh(Vector2Int start, Vector2Int end)
+    public List<Vector2Int> Bresh(Vector2Int start, Vector2Int end)
     {
         List<Vector2Int> outList = new List<Vector2Int>();
         outList.Add(start);
@@ -288,7 +253,7 @@ public class GraphicsPipeline : MonoBehaviour
         return outList;
     }
 
-    private List<Vector2Int> NegY(List<Vector2Int> vector2Ints)
+    public List<Vector2Int> NegY(List<Vector2Int> vector2Ints)
     {
         List<Vector2Int> negatedList = new List<Vector2Int>();
         foreach (var v in vector2Ints)
@@ -298,7 +263,7 @@ public class GraphicsPipeline : MonoBehaviour
         return negatedList;
     }
 
-    private Vector2Int NegY(Vector2Int v)
+    public Vector2Int NegY(Vector2Int v)
     {
         return new Vector2Int(v.x, -v.y);
     }

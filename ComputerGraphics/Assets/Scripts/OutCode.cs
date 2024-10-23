@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using Unity.VisualScripting;
-using Unity.VisualScripting.FullSerializer;
 using UnityEngine;
 
 public class OutCode
@@ -28,7 +27,7 @@ public class OutCode
         this.right = rightIn;
     }
 
-    public void Display()
+    public string Display()
     {
         string result = "";
 
@@ -38,6 +37,7 @@ public class OutCode
         result += (right) ? "1" : "0";
 
         Debug.Log(result);
+        return result;
     }
 
     public static OutCode operator  +(OutCode oc1, OutCode oc2) 
