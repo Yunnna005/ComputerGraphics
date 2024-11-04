@@ -1,8 +1,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class GraphicsPipeline : MonoBehaviour
 {
@@ -10,11 +12,40 @@ public class GraphicsPipeline : MonoBehaviour
 
     void Start()
     {
-        #region Create Model
-        /*myModel = new Model();
-        List<Vector4> verts = convertToHomg(myModel.vertices);
+        GameObject plane = GameObject.CreatePrimitive(PrimitiveType.Plane);
+        Renderer screenRender = plane.GetComponent<Renderer>();
 
-        //Rotation
+        plane.transform.up = -Vector3.forward;
+
+        Texture2D screenTexture = new Texture2D(1024, 1024);
+        screenRender.material.mainTexture = screenTexture;
+
+        Vector2Int start = new Vector2Int(0, 1024);
+        Vector2Int end = new Vector2Int(1024, 0);
+        List<Vector2Int> pts = Bresh(start, end);
+
+        foreach (Vector2Int pt in pts)
+        {
+            screenTexture.SetPixel(pt.x, pt.y, Color.red);
+        }
+        screenTexture.Apply();
+
+        myModel = new Model();
+
+        Matrix4x4 matrix4X4 = Matrix4x4.TRS(new Vector3(0, 0, -10), Quaternion.AxisAngle(Vector3.up, 45), Vector3.one);
+
+        List<Vector4> verts = applyTransformation(convertToHomg(myModel.vertices), matrix4X4);
+
+        foreach(Vector3Int face in myModel.faces)
+        {
+            Process(new Vector4[face.x], new Vector4[face.y]);
+            Process(new Vector4[face.y], new Vector4[face.z]);
+            Process(new Vector4[face.z], new Vector4[face.x]);
+        }
+
+        screenTexture.Apply();
+        #region Create Model
+        /*//Rotation
         Vector3 axis = (new Vector3(19, 1, 1)).normalized;
         Matrix4x4 rotationMatrix =Matrix4x4.TRS(Vector3.zero, Quaternion.AngleAxis(-28, axis), Vector3.one);
         //displayMatrix(rotationMatrix);
@@ -61,6 +92,39 @@ public class GraphicsPipeline : MonoBehaviour
         //displayVert(imageFinal);*/
         #endregion
 
+
+    }
+
+    private void Process(Vector4[] start4D, Vector4[] end4D)
+    {
+        Vector2 start = Project(start4D);
+        Vector2 end = Project(end4D);
+
+        //Clipping
+        if(LineClipping(ref  start, ref end))
+        {
+            //need to draw
+            Vector2Int startPix = pixelize(start);
+            Vector2Int endPix = pixelize(end);
+
+            List<Vector2Int> points = Bresh(startPix, endPix);
+            setPixels(points);
+        }
+    }
+
+    private void setPixels(List<Vector2Int> points)
+    {
+        throw new NotImplementedException();
+    }
+
+    private Vector2Int pixelize(Vector2 start)
+    {
+        throw new NotImplementedException();
+    }
+
+    private Vector2 Project(Vector4[] start4D)
+    {
+        throw new NotImplementedException();
     }
 
     #region Create Model
@@ -230,6 +294,10 @@ public class GraphicsPipeline : MonoBehaviour
         {
             return NegY(Bresh(NegY(start), NegY(end)));
         }
+        if (dy > dx)
+        {
+            return SwapXY(Bresh(SwapXY(start), SwapXY(end)));
+        }
         neg = 2 * (dy - dx);
         pos = 2 * dy;
         p = 2 * dy - dx;
@@ -253,6 +321,22 @@ public class GraphicsPipeline : MonoBehaviour
         return outList;
     }
 
+    private List<Vector2Int> SwapXY(List<Vector2Int> vector2Ints)
+    {
+        List<Vector2Int> swapList = new List<Vector2Int>();
+        foreach (var v in vector2Ints)
+        {
+            swapList.Add(SwapXY(v));
+        }
+        return swapList;
+    }
+
+    private Vector2Int SwapXY(Vector2Int start)
+    {
+        return new Vector2Int(start.y, start.x);
+    }
+
+    //NegY methods are overloding
     public List<Vector2Int> NegY(List<Vector2Int> vector2Ints)
     {
         List<Vector2Int> negatedList = new List<Vector2Int>();
