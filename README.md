@@ -13,9 +13,11 @@ Unity 3D, C#
 - Applied textures to enhance the visual appearance of the model.
 
 **3D Model "L" without texture**
+
 ![No Texture](Docs/L_noTexture.png)
 
 **3D model "L" with texture**
+
 ![Texture](Docs/L_Textured.png)
   
 2. Line Transformations:
@@ -31,6 +33,7 @@ Unity 3D, C#
 - Enabled the 3D model to rotate around its own axis or another specified origin point.
 
 **2D Texture**
+
 ![Texture](Docs/IMG_8149.gif)
 
 ![Texture](Docs/IMG_8150.gif)
