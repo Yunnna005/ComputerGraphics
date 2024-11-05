@@ -9,41 +9,21 @@ using UnityEngine.UIElements;
 public class GraphicsPipeline : MonoBehaviour
 {
     Model myModel;
+    Texture2D screenTexture;
+    Renderer screenRender;
+    private float angle;
 
     void Start()
     {
         GameObject plane = GameObject.CreatePrimitive(PrimitiveType.Plane);
-        Renderer screenRender = plane.GetComponent<Renderer>();
+        screenRender = plane.GetComponent<Renderer>();
 
         plane.transform.up = -Vector3.forward;
 
-        Texture2D screenTexture = new Texture2D(1024, 1024);
+        screenTexture = new Texture2D(1024, 1024);
         screenRender.material.mainTexture = screenTexture;
-
-        Vector2Int start = new Vector2Int(0, 1024);
-        Vector2Int end = new Vector2Int(1024, 0);
-        List<Vector2Int> pts = Bresh(start, end);
-
-        foreach (Vector2Int pt in pts)
-        {
-            screenTexture.SetPixel(pt.x, pt.y, Color.red);
-        }
-        screenTexture.Apply();
-
         myModel = new Model();
 
-        Matrix4x4 matrix4X4 = Matrix4x4.TRS(new Vector3(0, 0, -10), Quaternion.AxisAngle(Vector3.up, 45), Vector3.one);
-
-        List<Vector4> verts = applyTransformation(convertToHomg(myModel.vertices), matrix4X4);
-
-        foreach(Vector3Int face in myModel.faces)
-        {
-            Process(new Vector4[face.x], new Vector4[face.y]);
-            Process(new Vector4[face.y], new Vector4[face.z]);
-            Process(new Vector4[face.z], new Vector4[face.x]);
-        }
-
-        screenTexture.Apply();
         #region Create Model
         /*//Rotation
         Vector3 axis = (new Vector3(19, 1, 1)).normalized;
@@ -91,11 +71,9 @@ public class GraphicsPipeline : MonoBehaviour
         List<Vector4> imageFinal = applyTransformation(verts, matrixForEverything);
         //displayVert(imageFinal);*/
         #endregion
-
-
     }
 
-    private void Process(Vector4[] start4D, Vector4[] end4D)
+    private void Process(Vector4 start4D, Vector4 end4D)
     {
         Vector2 start = Project(start4D);
         Vector2 end = Project(end4D);
@@ -110,21 +88,67 @@ public class GraphicsPipeline : MonoBehaviour
             List<Vector2Int> points = Bresh(startPix, endPix);
             setPixels(points);
         }
+        else
+        {
+
+        }
     }
 
     private void setPixels(List<Vector2Int> points)
     {
-        throw new NotImplementedException();
+        foreach(Vector2Int point in points)
+        {
+            screenTexture.SetPixel(point.x, point.y, Color.red);
+        }
+    }
+
+
+    private void Update()
+    {
+        Destroy(screenTexture);
+        screenTexture  = new Texture2D(1024,1024);
+        screenRender.material.mainTexture = screenTexture;
+        angle += 1;
+        Matrix4x4 matrix4X4 = Matrix4x4.TRS(new Vector3(0, 0, -10), Quaternion.AngleAxis(angle , Vector3.up), Vector3.one);
+        Matrix4x4 mrot = Matrix4x4.TRS(Vector3.zero,Quaternion.AngleAxis(angle, Vector3.right), Vector3.one);
+        Matrix4x4 superMatrix = mrot * matrix4X4;
+        List<Vector4> verts = applyTransformation(convertToHomg(myModel.vertices), superMatrix);
+
+        foreach (Vector3Int face in myModel.faces)
+        {
+
+            if (IsVisible(verts[face.x]) && IsVisible(verts[face.y]))
+            {
+                Process(verts[face.x], verts[face.y]);
+            }
+
+            if (IsVisible(verts[face.y]) && IsVisible(verts[face.z]))
+            {
+                Process(verts[face.y], verts[face.z]);
+            }
+
+            if (IsVisible(verts[face.z]) && IsVisible(verts[face.x]))
+            {
+                Process(verts[face.z], verts[face.x]);
+            }
+        }
+
+        screenTexture.Apply();
+    }
+
+    private bool IsVisible(Vector4 vector4)
+    {
+        return vector4.z > 0;
     }
 
     private Vector2Int pixelize(Vector2 start)
     {
-        throw new NotImplementedException();
+        return new Vector2Int((int)Math.Round((start.x + 1) * 1023 / 2, 0), (int)Math.Round((start.y + 1) * 1023 / 2, 0));
     }
 
-    private Vector2 Project(Vector4[] start4D)
+    private Vector2 Project(Vector4 start4D)
     {
-        throw new NotImplementedException();
+        return new Vector2(start4D.x/start4D.z, start4D.y/start4D.z);
     }
 
     #region Create Model
