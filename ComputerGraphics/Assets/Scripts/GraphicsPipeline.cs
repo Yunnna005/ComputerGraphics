@@ -132,6 +132,12 @@ public class GraphicsPipeline : MonoBehaviour
                 Process(verts[face.z], verts[face.x]);
             }
         }
+        /*foreach (Vector3Int face in myModel.faces)
+        {
+            Process(verts[face.x], verts[face.y]);
+            Process(verts[face.y], verts[face.z]);
+            Process(verts[face.z], verts[face.x]);
+        }*/
 
         screenTexture.Apply();
     }
