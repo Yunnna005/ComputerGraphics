@@ -16,7 +16,7 @@ Unity 3D, C#
 ![No Texture](Docs/L_noTexture.png)
 
 **3D model "L" with texture**
-![Texture](Docs/L_Texture.png)
+![Texture](Docs/L_Textured.png)
   
 2. Line Transformations:
 - Implemented functions for placing, rotating, and scaling 3D objects.
@@ -29,3 +29,8 @@ Unity 3D, C#
 4. 2D Texturing:
 - Created a 2D texture to be applied to a plane where the 3D model is displayed.
 - Enabled the 3D model to rotate around its own axis or another specified origin point.
+
+**2D Texture**
+![Texture](Docs/IMG_8149.gif)
+
+![Texture](Docs/IMG_8150.gif)
