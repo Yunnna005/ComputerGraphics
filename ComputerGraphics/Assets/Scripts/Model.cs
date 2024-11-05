@@ -33,6 +33,7 @@ public class Model
         loadNormals();
     }
 
+    #region Model details (Verts, Faces, Normals) 
     private void loadNormals()
     {
         //Front
@@ -104,7 +105,9 @@ public class Model
         vertices.Add(new Vector3(0, 2, -1));    //10
         vertices.Add(new Vector3(-1, 3, -1));   //11
     }
+    #endregion
 
+    #region Texture Details
     private void loadTextureCoordinates()
     {
         texture_coordinates.Add(new Vector2(45,276));   //0
@@ -156,7 +159,7 @@ public class Model
             coordinates.Add(new Vector2(v.x/ResX, 1-v.y/ResY));
         return coordinates;
     }
-
+    #endregion
 
     public GameObject CreateUnityGameObject()
     {

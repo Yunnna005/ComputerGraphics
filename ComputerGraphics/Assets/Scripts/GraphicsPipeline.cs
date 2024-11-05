@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices.WindowsRuntime;
+using UnityEditor.PackageManager;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -11,11 +12,12 @@ public class GraphicsPipeline : MonoBehaviour
     Model myModel;
     Texture2D screenTexture;
     Renderer screenRender;
+    GameObject plane;
     private float angle;
 
     void Start()
     {
-        GameObject plane = GameObject.CreatePrimitive(PrimitiveType.Plane);
+        plane = GameObject.CreatePrimitive(PrimitiveType.Plane);
         screenRender = plane.GetComponent<Renderer>();
 
         plane.transform.up = -Vector3.forward;
@@ -24,137 +26,10 @@ public class GraphicsPipeline : MonoBehaviour
         screenRender.material.mainTexture = screenTexture;
         myModel = new Model();
 
-        #region Create Model
-        /*//Rotation
-        Vector3 axis = (new Vector3(19, 1, 1)).normalized;
-        Matrix4x4 rotationMatrix =Matrix4x4.TRS(Vector3.zero, Quaternion.AngleAxis(-28, axis), Vector3.one);
-        //displayMatrix(rotationMatrix);
-        List<Vector4> imageAfterRotation = applyTransformation(verts, rotationMatrix);
-        //displayVert(imageAfterRotation);
-
-        //Scale
-        Vector3 scale = (new Vector3(3, 1, 1));
-        Matrix4x4 scaleMatrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, scale);
-        //displayMatrix(scaleMatrix);
-        List<Vector4> imageAfterScale = applyTransformation(imageAfterRotation, scaleMatrix);
-        //displayVert(imageAfterScale);
-
-        //Translation
-        Vector3 translation = (new Vector3(-3, -3, 2));
-        Matrix4x4 translationMatrix = Matrix4x4.TRS(translation, Quaternion.identity, Vector3.one);
-        //displayMatrix(translationMatrix);
-        List<Vector4> imageAfterTranslation = applyTransformation(imageAfterScale, translationMatrix);
-        //displayVert(imageAfterTranslation);
-
-        //Single Transformation Matrix
-        Matrix4x4 singleTransformationMatrix = translationMatrix * scaleMatrix* rotationMatrix;
-        //displayMatrix(singleTransformationMatrix);
-        List<Vector4> imageAfterTransformation = applyTransformation(verts, singleTransformationMatrix);
-        //displayVert(imageAfterTransformation);
-
-        Vector3 cameraPosition = new Vector3(21, 4, 51);
-        Vector3 cameraLootAt = new Vector3(1, 3, 1).normalized;
-        Vector3 cameraLootUp = new Vector3(2, 1, 19).normalized;
-        Matrix4x4 cameraMatrix = Matrix4x4.LookAt(cameraPosition, cameraLootAt, cameraLootUp);
-        //displayMatrix(cameraMatrix);
-        List<Vector4> imageAfterCameraMetrix = applyTransformation(imageAfterTranslation, cameraMatrix);
-        //displayVert(imageAfterViewingMetrix);
-
-        //Projection z=-1
-        Matrix4x4 projectionMatrix = Matrix4x4.Perspective(90, 1, 1, 1000);
-        //displayMatrix(projectionMatrix);
-        List<Vector4> imageAfterProjection =  applyTransformation(imageAfterCameraMetrix, projectionMatrix);
-        //displayVert(imageAfterProjection);
-
-        Matrix4x4 matrixForEverything = projectionMatrix * cameraMatrix* singleTransformationMatrix;
-        //displayMatrix(matrixForEverything);
-        List<Vector4> imageFinal = applyTransformation(verts, matrixForEverything);
-        //displayVert(imageFinal);*/
-        #endregion
     }
-
-    private void Process(Vector4 start4D, Vector4 end4D)
-    {
-        Vector2 start = Project(start4D);
-        Vector2 end = Project(end4D);
-
-        //Clipping
-        if(LineClipping(ref  start, ref end))
-        {
-            //need to draw
-            Vector2Int startPix = pixelize(start);
-            Vector2Int endPix = pixelize(end);
-
-            List<Vector2Int> points = Bresh(startPix, endPix);
-            setPixels(points);
-        }
-        else
-        {
-
-        }
-    }
-
-    private void setPixels(List<Vector2Int> points)
-    {
-        foreach(Vector2Int point in points)
-        {
-            screenTexture.SetPixel(point.x, point.y, Color.red);
-        }
-    }
-
-
     private void Update()
     {
-        Destroy(screenTexture);
-        screenTexture  = new Texture2D(1024,1024);
-        screenRender.material.mainTexture = screenTexture;
-        angle += 1;
-        Matrix4x4 matrix4X4 = Matrix4x4.TRS(new Vector3(0, 0, -10), Quaternion.AngleAxis(angle , Vector3.up), Vector3.one);
-        Matrix4x4 mrot = Matrix4x4.TRS(Vector3.zero,Quaternion.AngleAxis(angle, Vector3.right), Vector3.one);
-        Matrix4x4 superMatrix = mrot * matrix4X4;
-        List<Vector4> verts = applyTransformation(convertToHomg(myModel.vertices), superMatrix);
-
-        foreach (Vector3Int face in myModel.faces)
-        {
-
-            if (IsVisible(verts[face.x]) && IsVisible(verts[face.y]))
-            {
-                Process(verts[face.x], verts[face.y]);
-            }
-
-            if (IsVisible(verts[face.y]) && IsVisible(verts[face.z]))
-            {
-                Process(verts[face.y], verts[face.z]);
-            }
-
-            if (IsVisible(verts[face.z]) && IsVisible(verts[face.x]))
-            {
-                Process(verts[face.z], verts[face.x]);
-            }
-        }
-        /*foreach (Vector3Int face in myModel.faces)
-        {
-            Process(verts[face.x], verts[face.y]);
-            Process(verts[face.y], verts[face.z]);
-            Process(verts[face.z], verts[face.x]);
-        }*/
-
-        screenTexture.Apply();
-    }
-
-    private bool IsVisible(Vector4 vector4)
-    {
-        return vector4.z > 0;
-    }
-
-    private Vector2Int pixelize(Vector2 start)
-    {
-        return new Vector2Int((int)Math.Round((start.x + 1) * 1023 / 2, 0), (int)Math.Round((start.y + 1) * 1023 / 2, 0));
-    }
-
-    private Vector2 Project(Vector4 start4D)
-    {
-        return new Vector2(start4D.x/start4D.z, start4D.y/start4D.z);
+        RenderModelToTexture();
     }
 
     #region Create Model
@@ -195,6 +70,60 @@ public class GraphicsPipeline : MonoBehaviour
         for (int i = 0; i < 4; i++)
         { print(rotationMatrix.GetRow(i)); }
     }
+    #endregion
+
+    #region Model Matrics
+    private void Matrics()
+    {
+        myModel = new Model();
+        List<Vector4> verts = convertToHomg(myModel.vertices);
+        //Rotation
+        Vector3 axis = (new Vector3(19, 1, 1)).normalized;
+        Matrix4x4 rotationMatrix = Matrix4x4.TRS(Vector3.zero, Quaternion.AngleAxis(-28, axis), Vector3.one);
+        displayMatrix(rotationMatrix);
+        List<Vector4> imageAfterRotation = applyTransformation(verts, rotationMatrix);
+        displayVert(imageAfterRotation);
+
+        //Scale
+        Vector3 scale = (new Vector3(3, 1, 1));
+        Matrix4x4 scaleMatrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, scale);
+        displayMatrix(scaleMatrix);
+        List<Vector4> imageAfterScale = applyTransformation(imageAfterRotation, scaleMatrix);
+        displayVert(imageAfterScale);
+
+        //Translation
+        Vector3 translation = (new Vector3(-3, -3, 2));
+        Matrix4x4 translationMatrix = Matrix4x4.TRS(translation, Quaternion.identity, Vector3.one);
+        displayMatrix(translationMatrix);
+        List<Vector4> imageAfterTranslation = applyTransformation(imageAfterScale, translationMatrix);
+        displayVert(imageAfterTranslation);
+
+        //Single Transformation Matrix
+        Matrix4x4 singleTransformationMatrix = translationMatrix * scaleMatrix * rotationMatrix;
+        displayMatrix(singleTransformationMatrix);
+        List<Vector4> imageAfterTransformation = applyTransformation(verts, singleTransformationMatrix);
+        displayVert(imageAfterTransformation);
+
+        Vector3 cameraPosition = new Vector3(21, 4, 51);
+        Vector3 cameraLootAt = new Vector3(1, 3, 1).normalized;
+        Vector3 cameraLootUp = new Vector3(2, 1, 19).normalized;
+        Matrix4x4 cameraMatrix = Matrix4x4.LookAt(cameraPosition, cameraLootAt, cameraLootUp);
+        displayMatrix(cameraMatrix);
+        List<Vector4> imageAfterCameraMetrix = applyTransformation(imageAfterTranslation, cameraMatrix);
+        displayVert(imageAfterCameraMetrix);
+
+        //Projection z=-1
+        Matrix4x4 projectionMatrix = Matrix4x4.Perspective(90, 1, 1, 1000);
+        displayMatrix(projectionMatrix);
+        List<Vector4> imageAfterProjection = applyTransformation(imageAfterCameraMetrix, projectionMatrix);
+        displayVert(imageAfterProjection);
+
+        Matrix4x4 matrixForEverything = projectionMatrix * cameraMatrix * singleTransformationMatrix;
+        displayMatrix(matrixForEverything);
+        List<Vector4> imageFinal = applyTransformation(verts, matrixForEverything);
+        displayVert(imageFinal);
+    }
+
     #endregion
 
     #region Clipping
@@ -382,5 +311,85 @@ public class GraphicsPipeline : MonoBehaviour
         return new Vector2Int(v.x, -v.y);
     }
 
+    #endregion
+
+    #region Display 2D Texture 
+    private void RenderModelToTexture()
+    {
+        Destroy(screenTexture);
+        screenTexture = new Texture2D(1024, 1024);
+        screenRender.material.mainTexture = screenTexture;
+        angle += 1;
+        Matrix4x4 matrix4X4 = Matrix4x4.TRS(new Vector3(0, 0, -10), Quaternion.AngleAxis(angle, Vector3.up), Vector3.one);
+        Matrix4x4 mrot = Matrix4x4.TRS(Vector3.zero, Quaternion.AngleAxis(angle, Vector3.right), Vector3.one);
+        Matrix4x4 superMatrix = mrot * matrix4X4;
+        List<Vector4> verts = applyTransformation(convertToHomg(myModel.vertices), superMatrix);
+
+        foreach (Vector3Int face in myModel.faces)
+        {
+
+            if (IsVisible(verts[face.x]) && IsVisible(verts[face.y]))
+            {
+                Process(verts[face.x], verts[face.y]);
+            }
+
+            if (IsVisible(verts[face.y]) && IsVisible(verts[face.z]))
+            {
+                Process(verts[face.y], verts[face.z]);
+            }
+
+            if (IsVisible(verts[face.z]) && IsVisible(verts[face.x]))
+            {
+                Process(verts[face.z], verts[face.x]);
+            }
+        }
+        /*foreach (Vector3Int face in myModel.faces)
+        {
+            Process(verts[face.x], verts[face.y]);
+            Process(verts[face.y], verts[face.z]);
+            Process(verts[face.z], verts[face.x]);
+        }*/
+
+        screenTexture.Apply();
+    }
+    private void Process(Vector4 start4D, Vector4 end4D)
+    {
+        Vector2 start = Project(start4D);
+        Vector2 end = Project(end4D);
+
+        //Clipping
+        if (LineClipping(ref start, ref end))
+        {
+            //need to draw
+            Vector2Int startPix = pixelize(start);
+            Vector2Int endPix = pixelize(end);
+
+            List<Vector2Int> points = Bresh(startPix, endPix);
+            setPixels(points);
+        }
+    }
+
+    private void setPixels(List<Vector2Int> points)
+    {
+        foreach (Vector2Int point in points)
+        {
+            screenTexture.SetPixel(point.x, point.y, Color.red);
+        }
+    }
+
+    private bool IsVisible(Vector4 vector4)
+    {
+        return vector4.z > 0;
+    }
+
+    private Vector2Int pixelize(Vector2 start)
+    {
+        return new Vector2Int((int)Math.Round((start.x + 1) * 1023 / 2, 0), (int)Math.Round((start.y + 1) * 1023 / 2, 0));
+    }
+
+    private Vector2 Project(Vector4 start4D)
+    {
+        return new Vector2(start4D.x / start4D.z, start4D.y / start4D.z);
+    }
     #endregion
 }
