@@ -11,7 +11,12 @@ Unity 3D, C#
 1. 3D Letter Creation:
 - Built a 3D letter model with defined vertices, faces, and normals.
 - Applied textures to enhance the visual appearance of the model.
+
+**3D Model "L" without texture**
 ![No Texture](Docs/L_noTexture.png)
+
+**3D model "L" with texture**
+![Texture](Docs/L_Texture.png)
   
 2. Line Transformations:
 - Implemented functions for placing, rotating, and scaling 3D objects.
