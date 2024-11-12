@@ -327,32 +327,39 @@ public class GraphicsPipeline : MonoBehaviour
 
         foreach (Vector3Int face in myModel.faces)
         {
+            Vector3 a = verts[face.y] - verts[face.x];
+            Vector3 b = verts[face.z] - verts[face.y];
 
-            if (IsVisible(verts[face.x]) && IsVisible(verts[face.y]))
+            if ( !IsBackFace(a,b))
             {
-                Process(verts[face.x], verts[face.y]);
-            }
+                EdgeTable edgeTable = new EdgeTable();
+                Process(verts[face.x], verts[face.y], edgeTable);
+                Process(verts[face.y], verts[face.z], edgeTable);
+                Process(verts[face.z], verts[face.x], edgeTable);
 
-            if (IsVisible(verts[face.y]) && IsVisible(verts[face.z]))
-            {
-                Process(verts[face.y], verts[face.z]);
-            }
-
-            if (IsVisible(verts[face.z]) && IsVisible(verts[face.x]))
-            {
-                Process(verts[face.z], verts[face.x]);
+                DrawScanLines(edgeTable);
             }
         }
-        /*foreach (Vector3Int face in myModel.faces)
-        {
-            Process(verts[face.x], verts[face.y]);
-            Process(verts[face.y], verts[face.z]);
-            Process(verts[face.z], verts[face.x]);
-        }*/
 
         screenTexture.Apply();
     }
-    private void Process(Vector4 start4D, Vector4 end4D)
+
+    private void DrawScanLines(EdgeTable edgeTable)
+    {
+        foreach(var item in edgeTable.edgeTable)
+        {
+            int y = item.Key;
+            int xMin = item.Value.start;
+            int xMax = item.Value.end;
+
+            for(int x =xMin; x <= xMax; x++)
+            {
+                screenTexture.SetPixel(x, y, Color.red);
+            }
+        }
+    }
+
+    private void Process(Vector4 start4D, Vector4 end4D, EdgeTable edgeTable)
     {
         Vector2 start = Project(start4D);
         Vector2 end = Project(end4D);
@@ -365,7 +372,9 @@ public class GraphicsPipeline : MonoBehaviour
             Vector2Int endPix = pixelize(end);
 
             List<Vector2Int> points = Bresh(startPix, endPix);
-            setPixels(points);
+            //setPixels(points);
+            edgeTable.Add(points);
+        
         }
     }
 
@@ -390,6 +399,11 @@ public class GraphicsPipeline : MonoBehaviour
     private Vector2 Project(Vector4 start4D)
     {
         return new Vector2(start4D.x / start4D.z, start4D.y / start4D.z);
+    }
+
+    private bool IsBackFace(Vector3 a, Vector3 b)
+    {
+        return Vector3.Cross(a, b).z<0;
     }
     #endregion
 }
