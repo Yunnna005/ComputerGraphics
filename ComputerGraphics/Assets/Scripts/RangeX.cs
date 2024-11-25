@@ -10,13 +10,14 @@ public class RangeX
 
     public void AddPoint(int x)
     {
-        if(start < 0)
+        if(start == -1)
         {
             start = x;
+            return;
         }
-        else
+        if(end == -1) 
         {
-            if(start < x)
+            if(start <= x)
             {
                 end = x;
             }
@@ -25,6 +26,16 @@ public class RangeX
                 end = start;
                 start = x;
             }
+            return;
+        }
+
+        if (x < start)
+        {
+            start = x;
+        }
+        if (x > end)
+        {
+            end = x;
         }
     }
 }

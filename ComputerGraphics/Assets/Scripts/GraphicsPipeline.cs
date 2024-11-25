@@ -15,6 +15,12 @@ public class GraphicsPipeline : MonoBehaviour
     GameObject plane;
     private float angle;
 
+    Vector2 a2;
+    Vector2 b2;
+    Vector2 c2;
+    Vector2 A;
+    Vector2 B;
+
     void Start()
     {
         plane = GameObject.CreatePrimitive(PrimitiveType.Plane);
@@ -320,17 +326,33 @@ public class GraphicsPipeline : MonoBehaviour
         screenTexture = new Texture2D(1024, 1024);
         screenRender.material.mainTexture = screenTexture;
         angle += 1;
+        //print(angle);
         Matrix4x4 matrix4X4 = Matrix4x4.TRS(new Vector3(0, 0, -10), Quaternion.AngleAxis(angle, Vector3.up), Vector3.one);
         Matrix4x4 mrot = Matrix4x4.TRS(Vector3.zero, Quaternion.AngleAxis(angle, Vector3.right), Vector3.one);
         Matrix4x4 superMatrix = mrot * matrix4X4;
         List<Vector4> verts = applyTransformation(convertToHomg(myModel.vertices), superMatrix);
 
-        foreach (Vector3Int face in myModel.faces)
+        for (int i = 0; i <myModel.faces.Count; i++)
         {
-            Vector3 a = verts[face.y] - verts[face.x];
-            Vector3 b = verts[face.z] - verts[face.y];
+            Vector3Int face = myModel.faces[i];
+            Vector3Int texture = myModel.texture_index_list[i];
 
-            if ( !IsBackFace(a,b))
+            Vector2 a_t = myModel.texture_coordinates[texture.x];
+            Vector2 b_t = myModel.texture_coordinates[texture.y];
+            Vector2 c_t = myModel.texture_coordinates[texture.z];
+
+            Vector3 a = verts[face.x]; 
+            Vector3 b = verts[face.y];  
+            Vector3 c = verts[face.z]; 
+
+            a2 = pixelize(Project(a));
+            b2 = pixelize(Project(b));
+            c2 = pixelize(Project(c));
+
+            A = b2 - a2;
+            B = c2 - a2;
+
+            if (Vector3.Cross(b2-a2, c2-b2).z<0)
             {
                 EdgeTable edgeTable = new EdgeTable();
                 Process(verts[face.x], verts[face.y], edgeTable);
@@ -340,7 +362,6 @@ public class GraphicsPipeline : MonoBehaviour
                 DrawScanLines(edgeTable);
             }
         }
-
         screenTexture.Apply();
     }
 
@@ -352,11 +373,24 @@ public class GraphicsPipeline : MonoBehaviour
             int xMin = item.Value.start;
             int xMax = item.Value.end;
 
+
             for(int x =xMin; x <= xMax; x++)
             {
-                screenTexture.SetPixel(x, y, Color.red);
+                Color color = getColorfromTexture(x,y);
+                screenTexture.SetPixel(x, y, color);
             }
         }
+    }
+
+    private Color getColorfromTexture(float x_p, int y_p)
+    {
+        float x = x_p - a2.x;
+        float y = y_p - a2.y;
+
+        float r = (x * B.y - y * B.x) / (A.x * B.y - A.y * B.x);
+        float s = (A.x * y - x * A.y) / (A.x * B.y - A.y * B.x);
+
+        return Color.red; //change
     }
 
     private void Process(Vector4 start4D, Vector4 end4D, EdgeTable edgeTable)
@@ -367,7 +401,6 @@ public class GraphicsPipeline : MonoBehaviour
         //Clipping
         if (LineClipping(ref start, ref end))
         {
-            //need to draw
             Vector2Int startPix = pixelize(start);
             Vector2Int endPix = pixelize(end);
 
@@ -388,7 +421,7 @@ public class GraphicsPipeline : MonoBehaviour
 
     private bool IsVisible(Vector4 vector4)
     {
-        return vector4.z > 0;
+        return vector4.z < 0;
     }
 
     private Vector2Int pixelize(Vector2 start)
@@ -403,7 +436,7 @@ public class GraphicsPipeline : MonoBehaviour
 
     private bool IsBackFace(Vector3 a, Vector3 b)
     {
-        return Vector3.Cross(a, b).z<0;
+        return Vector3.Cross(a, b).z>0;
     }
     #endregion
 }
