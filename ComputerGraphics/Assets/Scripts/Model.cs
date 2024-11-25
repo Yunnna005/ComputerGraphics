@@ -7,8 +7,8 @@ public class Model
 {
     internal List<Vector3> vertices;
     internal List<Vector3Int> faces;
-    List<Vector2> texture_coordinates;
-    List<Vector3Int> texture_index_list;
+    internal List<Vector2> texture_coordinates;
+    internal List<Vector3Int> texture_index_list;
     List<Vector3> normals;
 
     public Model()
@@ -67,27 +67,37 @@ public class Model
     }
 
     private void loadFaces()
-    {
+    {  
         faces.Add(new Vector3Int(0, 5, 4));    //Front right
         faces.Add(new Vector3Int(0, 4, 3));    //Front right
-        faces.Add(new Vector3Int(0, 3, 2));    //Front left
-        faces.Add(new Vector3Int(0, 2, 1));    //Front left
+
+        faces.Add(new Vector3Int(0, 3, 2));
+        faces.Add(new Vector3Int(0, 2, 1));
+
         faces.Add(new Vector3Int(6, 10, 11));  //Back right
         faces.Add(new Vector3Int(6, 9, 10));   //Back right
         faces.Add(new Vector3Int(6, 8, 9));    //Back left
         faces.Add(new Vector3Int(6, 7, 8));    //Back left
+        
         faces.Add(new Vector3Int(4, 11, 10));  //Top
         faces.Add(new Vector3Int(4, 5, 11));   //Top
+       
         faces.Add(new Vector3Int(3, 4, 10));   //Vertical Left
         faces.Add(new Vector3Int(3, 10, 9));   //Vertical Left
+
+
         faces.Add(new Vector3Int(0, 11, 5));   //Vertical Right
         faces.Add(new Vector3Int(0, 6, 11));   //Vertical Right
-        faces.Add(new Vector3Int(3, 9, 8));    //Gorizontal Top
-        faces.Add(new Vector3Int(3, 8, 2));    //Gorizontal Top
+
+        faces.Add(new Vector3Int(2, 3, 9));    //Gorizontal Top
+        faces.Add(new Vector3Int(2, 9, 8));    //Gorizontal Top
+
         faces.Add(new Vector3Int(0, 7, 6));    //Gorizontal Bottom
         faces.Add(new Vector3Int(0, 1, 7));    //Gorizontal Bottom
+        
         faces.Add(new Vector3Int(1, 2, 8));    //Gorizontal Right
         faces.Add(new Vector3Int(1, 8, 7));    //Gorizontal Right
+        
     }
 
     private void loadVertices()
