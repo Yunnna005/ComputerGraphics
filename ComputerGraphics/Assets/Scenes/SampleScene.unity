@@ -245,6 +245,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bf5324fe96dc2484ebe0e00a6143f534, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  texture_file: {fileID: 2800000, guid: 643044601b292e941aa6117105e62e91, type: 3}
 --- !u!4 &812024179
 Transform:
   m_ObjectHideFlags: 0
