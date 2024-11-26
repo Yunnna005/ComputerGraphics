@@ -15,12 +15,10 @@ public class GraphicsPipeline : MonoBehaviour
     GameObject plane;
     private float angle;
 
-    Vector2 a2;
-    Vector2 b2;
-    Vector2 c2;
-    Vector2 A;
-    Vector2 B;
+    Vector2 a2, b2, c2, a_t, b_t, c_t;
+    Vector2 A, A_t, B, B_t;
 
+    public Texture2D texture_file;
     void Start()
     {
         plane = GameObject.CreatePrimitive(PrimitiveType.Plane);
@@ -326,20 +324,19 @@ public class GraphicsPipeline : MonoBehaviour
         screenTexture = new Texture2D(1024, 1024);
         screenRender.material.mainTexture = screenTexture;
         angle += 1;
-        //print(angle);
-        Matrix4x4 matrix4X4 = Matrix4x4.TRS(new Vector3(0, 0, -10), Quaternion.AngleAxis(angle, Vector3.up), Vector3.one);
+        Matrix4x4 matrix4X4 = Matrix4x4.TRS(new Vector3(0, 0, -10), Quaternion.AngleAxis(angle, (new Vector3(1,1,1)).normalized), Vector3.one);
         Matrix4x4 mrot = Matrix4x4.TRS(Vector3.zero, Quaternion.AngleAxis(angle, Vector3.right), Vector3.one);
         Matrix4x4 superMatrix = mrot * matrix4X4;
-        List<Vector4> verts = applyTransformation(convertToHomg(myModel.vertices), superMatrix);
+        List<Vector4> verts = applyTransformation(convertToHomg(myModel.vertices), matrix4X4);
 
         for (int i = 0; i <myModel.faces.Count; i++)
         {
             Vector3Int face = myModel.faces[i];
             Vector3Int texture = myModel.texture_index_list[i];
 
-            Vector2 a_t = myModel.texture_coordinates[texture.x];
-            Vector2 b_t = myModel.texture_coordinates[texture.y];
-            Vector2 c_t = myModel.texture_coordinates[texture.z];
+            a_t = myModel.texture_coordinates[texture.x];
+            b_t = myModel.texture_coordinates[texture.y];
+            c_t = myModel.texture_coordinates[texture.z];
 
             Vector3 a = verts[face.x]; 
             Vector3 b = verts[face.y];  
@@ -351,6 +348,9 @@ public class GraphicsPipeline : MonoBehaviour
 
             A = b2 - a2;
             B = c2 - a2;
+
+            A_t = b_t - a_t;
+            B_t = c_t - a_t;
 
             if (Vector3.Cross(b2-a2, c2-b2).z<0)
             {
@@ -390,7 +390,12 @@ public class GraphicsPipeline : MonoBehaviour
         float r = (x * B.y - y * B.x) / (A.x * B.y - A.y * B.x);
         float s = (A.x * y - x * A.y) / (A.x * B.y - A.y * B.x);
 
-        return Color.red; //change
+        Vector2 texture_point = a_t+r*A_t+s*B_t;
+        texture_point *= 512;
+
+        Color color = texture_file.GetPixel((int)texture_point.x, (int)texture_point.y);
+
+        return color;
     }
 
     private void Process(Vector4 start4D, Vector4 end4D, EdgeTable edgeTable)
